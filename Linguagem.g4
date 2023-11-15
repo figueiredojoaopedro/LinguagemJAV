@@ -36,12 +36,12 @@ declVar: (type
     SEMMICOLLON {codigoJava += ";\n";}
     )*;
 
-type: ( 'int' {codigoJava += "\tint "; tipo = 0;} | 'string'{codigoJava += "\tchar "; tipo = 1;} | 'float'{codigoJava += "\tfloat ";tipo = 2;});
+type: ( 'int' {codigoJava += "\tint "; tipo = 0;} | 'string'{codigoJava += "\tString "; tipo = 1;} | 'float'{codigoJava += "\tfloat ";tipo = 2;});
 
 cmd: cmdif | cmdwhile | cmdfor | cmdread | cmdwrite | cmdattr;
 
 cmdif: 'if' {
-        codigoJava: += "\n\tif(";
+        codigoJava += "\n\tif(";
     } comp
     {
         codigoJava += ")";
@@ -68,7 +68,7 @@ cmdwhile: 'while' {
         codigoJava += "){\n\t";
     } cmd CLOSECURLYBRACKETS
     {
-        codigoJava += "\n\t}"
+        codigoJava += "\n\t}";
     };
 
 cmdread: 'read' {
@@ -83,7 +83,7 @@ cmdwrite: 'write' {
     } ID {
         codigoJava += $ID.text+")";
     } SEMMICOLLON {
-        codigoJava += ";"
+        codigoJava += ";";
     };
 
 cmdfor: 'for' OPENBRACKETS
@@ -94,11 +94,11 @@ cmdfor: 'for' OPENBRACKETS
         codigoJava += "; ";
     } comp ';'
     {
-        codigojava += "; ";
+        codigoJava += "; ";
     } ID
     {
         codigoJava += $ID.text;
-    } logicalOperators (ID{codigoJava += $ID.text} | NUMBER{codigoJava += $NUMBER.text}) CLOSEBRACKETS OPENCURLYBRACKETS
+    } logicalOperators (ID{codigoJava += $ID.text;} | NUMBER{codigoJava += $NUMBER.text;}) CLOSEBRACKETS OPENCURLYBRACKETS
     {
         codigoJava += ") {\n\t";
     } cmd CLOSECURLYBRACKETS
@@ -119,8 +119,8 @@ cmdattr: ID {Variavel var1 = cv.busca($ID.text); codigoJava += $ID.text;}
 
 comp: (ID {codigoJava += $ID.text;}| NUMBER{codigoJava += $NUMBER.text;}) relationalOperators (ID {codigoJava += $ID.text;}| NUMBER{codigoJava += $NUMBER.text;});
 
-logicalOperators: ('+'{saida += " + ";} | '-'{saida += " - ";} | '/'{saida += " / ";} | '*'{saida += " * ";});
-relationalOperators: ('>'{saida += " > ";} | '<'{saida += " < ";} | '>='{saida += " >= ";} | '<='{saida += " <= ";} | '=='{saida += " == ";} | '!='{saida += " != ";}) ;
+logicalOperators: ('+'{codigoJava += " + ";} | '-'{codigoJava += " - ";} | '/'{codigoJava += " / ";} | '*'{codigoJava += " * ";});
+relationalOperators: ('>'{codigoJava += " > ";} | '<'{codigoJava += " < ";} | '>='{codigoJava += " >= ";} | '<='{codigoJava += " <= ";} | '=='{codigoJava += " == ";} | '!='{codigoJava += " != ";}) ;
 
 ID: [A-Za-z]+;
 NUMBER: [0-9]+.?[0-9]*;
