@@ -2,16 +2,29 @@ grammar Linguagem;
 
 @header{
     import java.util.*;
-    import java.util.Scanner;
 }
 
 @members {
-      Variavel x = new Variavel();
-      ControleVariavel cv = new ControleVariavel();
-      String codigoJava="";
-      int escopo;
-      int tipo;
-      String nome;
+    Variavel x = new Variavel();
+    ControleVariavel cv = new ControleVariavel();
+    String codigoJava="";
+    int escopo;
+    int tipo;
+    String nome;
+    int valor_int;
+    float valor_float;
+    String valor_string;
+
+    private void indent(StringBuilder code, int level) {
+        for (int i = 0; i < level; i++) {
+            code.append("\t");
+        }
+    }
+
+   private void printBraces(StringBuilder code, int level, boolean open) {
+        indent(code, level);
+        code.append(open ? "{\n" : "}\n");
+   }
 }
 
 start: declVar 'run' OPENCURLYBRACKETS {codigoJava += "public class Codigo{\n";}
@@ -36,16 +49,16 @@ declVar: (type
     SEMMICOLLON {codigoJava += ";\n";}
     )*;
 
-type: ( 'int' {codigoJava += "\tint "; tipo = 0;} | 'string'{codigoJava += "\tString "; tipo = 1;} | 'float'{codigoJava += "\tfloat ";tipo = 2;});
+type: ( 'int' {codigoJava += "\tint "; tipo = 0;} | 'string' {codigoJava += "\tString "; tipo = 1;} | 'float' {codigoJava += "\tfloat ";tipo = 2;});
 
-cmd: cmdif | cmdwhile | cmdfor | cmdread | cmdwrite | cmdattr;
+cmd: (cmdif | cmdwhile | cmdfor | cmdread | cmdwrite | cmdattr)*;
 
 cmdif: 'if' {
         codigoJava += "\n\tif(";
     } comp
     {
         codigoJava += ")";
-    } '{' OPENCURLYBRACKETS
+    } OPENCURLYBRACKETS
     {
         codigoJava += "{\n\t";
     } cmd CLOSECURLYBRACKETS
@@ -86,25 +99,35 @@ cmdwrite: 'write' {
         codigoJava += ";";
     };
 
-cmdfor: 'for' OPENBRACKETS
-    {
-        codigoJava += "\tfor (";
-    } cmdattr ';'
-    {
-        codigoJava += "; ";
-    } comp ';'
-    {
-        codigoJava += "; ";
-    } ID
-    {
-        codigoJava += $ID.text;
-    } logicalOperators (ID{codigoJava += $ID.text;} | NUMBER{codigoJava += $NUMBER.text;}) CLOSEBRACKETS OPENCURLYBRACKETS
-    {
-        codigoJava += ") {\n\t";
-    } cmd CLOSECURLYBRACKETS
-    {
-        codigoJava += "\n\t}";
-    };
+cmdfor
+    : 'for' OPENBRACKETS
+        {
+            codigoJava += "\tfor (";
+        }
+        cmdattr SEMMICOLLON
+        {
+            codigoJava += " ";
+        }
+        comp SEMMICOLLON
+        {
+            codigoJava += "; ";
+        }
+        ID
+        {
+            codigoJava += $ID.text;
+        }
+        logicalOperators (ID | NUMBER)?
+    CLOSEBRACKETS OPENCURLYBRACKETS
+        {
+            codigoJava += ") {\n\t";
+        }
+        cmd
+    CLOSECURLYBRACKETS
+        {
+            codigoJava += "\n\t}";
+        }
+    ;
+
 
 cmdattr: ID {Variavel var1 = cv.busca($ID.text); codigoJava += $ID.text;}
          EQUAL {codigoJava += " = ";}
@@ -119,7 +142,7 @@ cmdattr: ID {Variavel var1 = cv.busca($ID.text); codigoJava += $ID.text;}
 
 comp: (ID {codigoJava += $ID.text;}| NUMBER{codigoJava += $NUMBER.text;}) relationalOperators (ID {codigoJava += $ID.text;}| NUMBER{codigoJava += $NUMBER.text;});
 
-logicalOperators: ('+'{codigoJava += " + ";} | '-'{codigoJava += " - ";} | '/'{codigoJava += " / ";} | '*'{codigoJava += " * ";});
+logicalOperators: ('+'{codigoJava += " + ";} | '-'{codigoJava += " - ";} | '/'{codigoJava += " / ";} | '*'{codigoJava += " * ";} | '++'{codigoJava += "++ ";} | '--'{codigoJava += "-- ";});
 relationalOperators: ('>'{codigoJava += " > ";} | '<'{codigoJava += " < ";} | '>='{codigoJava += " >= ";} | '<='{codigoJava += " <= ";} | '=='{codigoJava += " == ";} | '!='{codigoJava += " != ";}) ;
 
 ID: [A-Za-z]+;
