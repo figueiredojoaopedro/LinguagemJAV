@@ -88,15 +88,28 @@ cmdread: 'read' {
             codigoJava += "\tScanner sc = new Scanner(";
          } ID
          {
-            codigoJava += $ID.text+")";
-         } SEMMICOLLON {codigoJava+=";\n";};
+                 codigoJava += $ID.text;
+             } (ESPACO ID)? {
+                 codigoJava += " ";
+                 codigoJava += $ID.text;
+             } | {
+                 codigoJava += ")";
+             } SEMMICOLLON {
+                 codigoJava+=";\n";;
+             };
 
 cmdwrite: 'write' {
         codigoJava += "\tSystem.out.println(";
-    } ID {
-        codigoJava += $ID.text+")";
+    } ID
+    {
+        codigoJava += $ID.text;
+    } (ESPACO ID)? {
+        codigoJava += " ";
+        codigoJava += $ID.text;
+    } | {
+        codigoJava += ")";
     } SEMMICOLLON {
-        codigoJava += ";";
+        codigoJava+=";\n";;
     };
 
 cmdfor
@@ -152,6 +165,7 @@ OPENCURLYBRACKETS: '{' ;
 CLOSECURLYBRACKETS: '}' ;
 OPENBRACKETS: '(' ;
 CLOSEBRACKETS: ')' ;
+ESPACO: [ \t];
 
 EQUAL: '=';
 WS: [ \t\r\n]+ -> skip;
