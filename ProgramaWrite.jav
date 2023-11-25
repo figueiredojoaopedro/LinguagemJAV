@@ -1,7 +1,7 @@
 run{
 
     write
-    Bom;
+    Bom dia pessoal;
 
 
 

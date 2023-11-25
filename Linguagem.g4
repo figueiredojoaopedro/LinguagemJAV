@@ -75,7 +75,7 @@ cmdif: 'if' {
     })?;
 
 cmdwhile: 'while' {
-        codigoJava += "\twhile (";
+        codigoJava += "\n\twhile (";
     } comp
     {
         codigoJava += "){\n\t";
@@ -84,36 +84,27 @@ cmdwhile: 'while' {
         codigoJava += "\n\t}";
     };
 
-cmdread: 'read' {
-            codigoJava += "\tScanner sc = new Scanner(";
-         } ID
-         {
-                 codigoJava += $ID.text;
-             } (ESPACO ID)? {
-                 codigoJava += " ";
-                 codigoJava += $ID.text;
-             } | {
-                 codigoJava += ")";
-             } SEMMICOLLON {
-                 codigoJava+=";\n";;
-             };
+cmdread: 'read'
+            {
+            codigoJava+="\tScanner sc = new Scanner(";
+            } ID
+            {
+            codigoJava+=$ID.text+")";
+            } SEMMICOLLON {codigoJava+=";\n";};
+
 
 cmdwrite: 'write' {
-        codigoJava += "\tSystem.out.println(";
-    } ID
-    {
+    codigoJava += "\tSystem.out.println(";
+    } ID+ {
         codigoJava += $ID.text;
-    } (ESPACO ID)? {
-        codigoJava += " ";
-        codigoJava += $ID.text;
-    } | {
+    } (ESPACO ID+ {
+        codigoJava += " " + $ID.text;
+    })* {
         codigoJava += ")";
     } SEMMICOLLON {
-        codigoJava+=";\n";;
+        codigoJava += ";\n";
     };
-
-cmdfor
-    : 'for' OPENBRACKETS
+cmdfor: 'for' OPENBRACKETS
         {
             codigoJava += "\tfor (";
         }
@@ -166,6 +157,5 @@ CLOSECURLYBRACKETS: '}' ;
 OPENBRACKETS: '(' ;
 CLOSEBRACKETS: ')' ;
 ESPACO: [ \t];
-
 EQUAL: '=';
 WS: [ \t\r\n]+ -> skip;
