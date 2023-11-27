@@ -1,7 +1,6 @@
 run{
 
-    write
-    Bom dia pessoal;
+    write "este eh um teste do meu write";
 
 
 

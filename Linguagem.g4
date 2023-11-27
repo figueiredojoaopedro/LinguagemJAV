@@ -36,8 +36,8 @@ start: declVar 'run' OPENCURLYBRACKETS {codigoJava += "public class Codigo{\n";}
     {codigoJava += "}\n";}
     {System.out.println(codigoJava);};
 
-declVar: (type
-    ID {
+declVar: (type SPACE*
+    ID SPACE* {
         codigoJava += $ID.text;
         x = new Variavel($ID.text, tipo, 0);
         boolean resultado = cv.adiciona(x);
@@ -45,13 +45,13 @@ declVar: (type
               System.out.println("A variavel "+x.getNome()+" ja foi declarada");
               System.exit(0);
         }
-    }
-    SEMMICOLLON {codigoJava += ";\n";}
+    } SPACE*
+    SEMICOLON {codigoJava += ";\n";}
     )*;
 
 type: ( 'int' {codigoJava += "\tint "; tipo = 0;} | 'string' {codigoJava += "\tString "; tipo = 1;} | 'float' {codigoJava += "\tfloat ";tipo = 2;});
 
-cmd: (cmdif | cmdwhile | cmdfor | cmdread | cmdwrite | cmdattr)*;
+cmd: (cmdif | cmdwhile | cmdfor | cmdwrite | cmdattr | cmdreadint | cmdreadfloat | cmdreadstring | cmdwriteVar)*;
 
 cmdif: 'if' {
         codigoJava += "\n\tif(";
@@ -84,46 +84,51 @@ cmdwhile: 'while' {
         codigoJava += "\n\t}";
     };
 
-cmdread: 'read'
-            {
-            codigoJava+="\tScanner sc = new Scanner(";
-            } ID
-            {
-            codigoJava+=$ID.text+")";
-            } SEMMICOLLON {codigoJava+=";\n";};
+cmdreadint: 'int' SPACE ID SPACE* '=' SPACE*{
+        codigoJava+="\tScanner " + $ID.text + "int = new Scanner(System.in);\n";
+    } 'read' OPENBRACKETS 'int' CLOSEBRACKETS{
+        codigoJava+="\tint " + $ID.text + " = " + $ID.text + "int.nextLine();\n";
+    } SEMICOLON;
 
+cmdreadfloat: 'float' SPACE ID SPACE* '=' SPACE*{
+        codigoJava+="\tScanner " + $ID.text + "float = new Scanner(System.in);\n";
+    } 'read' OPENBRACKETS 'float' CLOSEBRACKETS{
+        codigoJava+="\tfloat " + $ID.text + " = " + $ID.text + "float.nextLine();\n";
+    } SEMICOLON;
 
-cmdwrite: 'write' {
-    codigoJava += "\tSystem.out.println(";
-    } ID+ {
-        codigoJava += $ID.text;
-    } (ESPACO ID+ {
-        codigoJava += " " + $ID.text;
-    })* {
-        codigoJava += ")";
-    } SEMMICOLLON {
-        codigoJava += ";\n";
-    };
-cmdfor: 'for' OPENBRACKETS
+cmdreadstring: 'string' SPACE ID SPACE* '=' SPACE* {
+        codigoJava+="\tScanner " + $ID.text + "string = new Scanner(System.in);\n";
+    } 'read' OPENBRACKETS 'string' CLOSEBRACKETS{
+        codigoJava+="\tString " + $ID.text + " = " + $ID.text + "string.nextLine();\n";
+    } SEMICOLON;
+
+cmdwrite: 'write' SPACE* STRING SPACE* SEMICOLON {
+    codigoJava += "\tSystem.out.println(" + $STRING.text + ");\n";
+};
+
+cmdwriteVar: 'write' SPACE* ID SPACE* SEMICOLON {
+    codigoJava += "\tSystem.out.println(" + $ID.text + ");\n";
+};
+
+cmdfor: 'for' SPACE* OPENBRACKETS
         {
             codigoJava += "\tfor (";
         }
-        cmdattr SEMMICOLLON
-        {
-            codigoJava += " ";
-        }
-        comp SEMMICOLLON
+        SPACE* cmdattr SPACE* SEMICOLON SPACE*
         {
             codigoJava += "; ";
         }
-        ID
+        SPACE* comp SPACE* SEMICOLON SPACE*
+        {
+            codigoJava += "; ";
+        }
+        SPACE* ID SPACE*
         {
             codigoJava += $ID.text;
         }
-        logicalOperators (ID | NUMBER)?
-    CLOSEBRACKETS OPENCURLYBRACKETS
+        SPACE* logicalOperators (ID | NUMBER)? SPACE* CLOSEBRACKETS OPENCURLYBRACKETS
         {
-            codigoJava += ") {\n\t";
+            codigoJava += "){\n\t";
         }
         cmd
     CLOSECURLYBRACKETS
@@ -133,29 +138,30 @@ cmdfor: 'for' OPENBRACKETS
     ;
 
 
-cmdattr: ID {Variavel var1 = cv.busca($ID.text); codigoJava += $ID.text;}
-         EQUAL {codigoJava += " = ";}
-         (ID {Variavel var2 = cv.busca($ID.text);
+cmdattr: ID SPACE* {Variavel var1 = cv.busca($ID.text); codigoJava += $ID.text;}
+         EQUAL SPACE* {codigoJava += " = ";}
+         (SPACE* ID  SPACE*{Variavel var2 = cv.busca($ID.text);
                 if(var1.getTipo()!=var2.getTipo()){
                      System.out.println("Atribuição invalida");
                      System.exit(0);
                 }
              codigoJava += $ID.text+";";}
-         | NUMBER{codigoJava += $NUMBER.text;})
+         | SPACE* NUMBER SPACE*{codigoJava += $NUMBER.text;})
          ;
 
-comp: (ID {codigoJava += $ID.text;}| NUMBER{codigoJava += $NUMBER.text;}) relationalOperators (ID {codigoJava += $ID.text;}| NUMBER{codigoJava += $NUMBER.text;});
+comp: (SPACE* ID SPACE* {codigoJava += $ID.text;} | SPACE* NUMBER SPACE*{codigoJava += $NUMBER.text;}) relationalOperators (SPACE* ID SPACE*{codigoJava += $ID.text;} | SPACE* NUMBER SPACE*{codigoJava += $NUMBER.text;});
 
-logicalOperators: ('+'{codigoJava += " + ";} | '-'{codigoJava += " - ";} | '/'{codigoJava += " / ";} | '*'{codigoJava += " * ";} | '++'{codigoJava += "++ ";} | '--'{codigoJava += "-- ";});
-relationalOperators: ('>'{codigoJava += " > ";} | '<'{codigoJava += " < ";} | '>='{codigoJava += " >= ";} | '<='{codigoJava += " <= ";} | '=='{codigoJava += " == ";} | '!='{codigoJava += " != ";}) ;
+logicalOperators: (SPACE* '+' SPACE* {codigoJava += " + ";} | SPACE* '-' SPACE*{codigoJava += " - ";} | SPACE* '/' SPACE*{codigoJava += " / ";} | SPACE* '*' SPACE*{codigoJava += " * ";} | SPACE* '++' SPACE*{codigoJava += "++ ";} | SPACE* '--' SPACE*{codigoJava += "-- ";});
+relationalOperators: (SPACE* '>' SPACE* {codigoJava += " > ";} | SPACE* '<' SPACE*{codigoJava += " < ";} | SPACE* '>=' SPACE* {codigoJava += " >= ";} | SPACE* '<=' SPACE* {codigoJava += " <= ";} | SPACE* '==' SPACE*{codigoJava += " == ";} | SPACE* '!=' SPACE*{codigoJava += " != ";}) ;
 
-ID: [A-Za-z]+;
+ID: [A-Za-z]+[0-9]*;
 NUMBER: [0-9]+.?[0-9]*;
-SEMMICOLLON: ';';
+SEMICOLON: ';';
 OPENCURLYBRACKETS: '{' ;
 CLOSECURLYBRACKETS: '}' ;
 OPENBRACKETS: '(' ;
 CLOSEBRACKETS: ')' ;
-ESPACO: [ \t];
+SPACE: [ \t];
 EQUAL: '=';
 WS: [ \t\r\n]+ -> skip;
+STRING: '"' .*? '"' ;
