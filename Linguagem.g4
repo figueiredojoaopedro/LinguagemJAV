@@ -74,15 +74,16 @@ cmdif: 'if' {
         codigoJava += "\n\t}\n";
     })?;
 
-cmdwhile: 'while' {
+cmdwhile: 'while' SPACE* {
         codigoJava += "\n\twhile (";
-    } comp
+    } SPACE* comp SPACE* OPENCURLYBRACKETS
     {
         codigoJava += "){\n\t";
     } cmd CLOSECURLYBRACKETS
     {
         codigoJava += "\n\t}";
     };
+
 
 cmdreadint: 'int' SPACE ID SPACE* '=' SPACE*{
         codigoJava+="\tScanner " + $ID.text + "int = new Scanner(System.in);\n";
@@ -138,15 +139,15 @@ cmdfor: 'for' SPACE* OPENBRACKETS
     ;
 
 
-cmdattr: ID SPACE* {Variavel var1 = cv.busca($ID.text); codigoJava += $ID.text;}
+cmdattr: ID SPACE* {Variavel var1 = cv.busca($ID.text); codigoJava += "\t" + $ID.text;}
          EQUAL SPACE* {codigoJava += " = ";}
          (SPACE* ID  SPACE*{Variavel var2 = cv.busca($ID.text);
                 if(var1.getTipo()!=var2.getTipo()){
                      System.out.println("Atribuição invalida");
                      System.exit(0);
                 }
-             codigoJava += $ID.text+";";}
-         | SPACE* NUMBER SPACE*{codigoJava += $NUMBER.text;})
+             codigoJava += $ID.text+";\n";}
+         | SPACE* NUMBER SPACE*{codigoJava += $NUMBER.text + "\n";})
          ;
 
 comp: (SPACE* ID SPACE* {codigoJava += $ID.text;} | SPACE* NUMBER SPACE*{codigoJava += $NUMBER.text;}) relationalOperators (SPACE* ID SPACE*{codigoJava += $ID.text;} | SPACE* NUMBER SPACE*{codigoJava += $NUMBER.text;});
