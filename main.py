@@ -7,7 +7,7 @@ from Guiche import Guiche
 
 def main():
     expedientTotalTime = 6  # 6 hours
-    realTimeElapsed = 120  # 2 minutes
+    realTimeElapsed = 300 # 2 minutes
     simulationTime = 0
     beginningTime = 10  # opens at 10 am
     equivalentToOneHour = int(realTimeElapsed / expedientTotalTime)
@@ -25,6 +25,8 @@ def main():
     totalSaquesRealizados = 0
     totalDepositosRealizados = 0
     totalPagamentosRealizados = 0
+    totalTempoEspera = 0  # Para calcular o tempo médio de espera
+    totalClientesNaFila = 0
 
     # Expediente:
     print("{}:00 Horas".format(beginningTime))
@@ -88,17 +90,26 @@ def main():
 
         time.sleep(2)
         simulationTime += 1
+    # Calcula o tempo extra de simulação até que todos os guichês estejam desocupados
+    tempoExtra = simulationTime - realTimeElapsed
+
+    # Calcula o tempo médio de espera na fila
+    tempoMedioEspera = totalTempoEspera / totalClientesNaFila if totalClientesNaFila > 0 else 0
+
 
     # Escrever relatório:
-    relatorio_content = f"Total de Clientes Atendidos: {totalClientesAtendidos}\n"
-    relatorio_content += f"Total de Operações Realizadas: {totalOperacoesRealizadas}\n"
-    relatorio_content += f"Total de Saques Realizadas: {totalSaquesRealizados}\n"
-    relatorio_content += f"Total de Depositos Realizadas: {totalDepositosRealizados}\n"
-    relatorio_content += f"Total de Pagamentos Realizadas: {totalPagamentosRealizados}\n"
+    relatorio = f"Total de Clientes Atendidos: {totalClientesAtendidos}\n"
+    relatorio += f"Total de Operações Realizadas: {totalOperacoesRealizadas}\n"
+    relatorio += f"Total de Saques Realizadas: {totalSaquesRealizados}\n"
+    relatorio += f"Total de Depositos Realizadas: {totalDepositosRealizados}\n"
+    relatorio += f"Total de Pagamentos Realizadas: {totalPagamentosRealizados}\n"
+    relatorio += f"Tempo Extra de Simulação: {tempoExtra:.2f} minutos\n"
+    relatorio += f"Tempo Médio de Espera na Fila: {tempoMedioEspera:.2f} minutos\n"
 
 
     with open("Relatorio.md", "w", encoding="utf-8") as file:
-        file.write(relatorio_content)
+        file.write(relatorio)
 
 if __name__ == "__main__":
     main()
+
